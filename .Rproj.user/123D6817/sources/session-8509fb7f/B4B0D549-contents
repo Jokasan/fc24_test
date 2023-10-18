@@ -73,13 +73,10 @@ explaner_xgb <- DALEX::explain(fiot_xgb_boost,
 modelStudio::modelStudio(explaner_xgb, new_observation_n =2)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
-regf;kerwg
 
 
-```{r}
 
-```
+
 
 
 

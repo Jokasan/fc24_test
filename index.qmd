@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+format: html
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+pacman::p_load(tidyverse,readr,infer,tidymodels,xgboost,SHAPforxgboost,DALEX,modelStudio)
+final_fit_wf <- readRDS("~/Documents/R/FC_24/final_fit_wf.rds")
+
+fc24 <- read_csv("fc24.csv")
+fc24 %>% 
+  select(player_id,long_name,league_name, club_name, overall:age,
+         height_cm,weight_kg, weak_foot, skill_moves, pace:attacking_heading_accuracy,
+         value_eur) -> fc24_model
+```
+
+You can add options to executable code like this 
+
+Or/and move the dashboard to the left, e.g.:
+
+<style type="text/css">
+
+.body {
+  max-width: 1200px;
+}
+
+.main-container {
+  max-width: 1200px;
+}
+
+</style>
+Or/and move the dashboard to the left, e.g.:
+
+<style type="text/css">
+
+.r2d3 {
+  position: relative !important;
+  left: -180px !important;
+}
+
+</style>
+
+
+```{r}
+#| echo: false
+fiot_xgb_boost <- boost_tree(
+  trees = 1041,
+  mtry = 13,
+  min_n = 3,
+  learn_rate = 0.01
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("regression") %>% 
+  fit(value_eur~league_name+overall+potential+ # This workflow takes removes NA values and logs the dependent variable
+        wage_eur+age+height_cm+weight_kg+weak_foot+skill_moves+
+        pace+shooting+passing+dribbling+defending+physic+attacking_crossing+
+        attacking_finishing+attacking_heading_accuracy,data = fc24_model)
+
+fc24_model %>% slice_sample(n=10) ->mds
+
+explaner_xgb <- DALEX::explain(fiot_xgb_boost,
+                               data = mds, 
+                               y = mds$value_eur)
+
+modelStudio::modelStudio(explaner_xgb, new_observation_n =2)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+regf;kerwg
+
+
+```{r}
+
+```
+
+
+
